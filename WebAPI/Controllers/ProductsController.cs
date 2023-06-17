@@ -37,7 +37,7 @@ namespace WebApi.Controllers
             return BadRequest(result.Message);
         }
 
-        [HttpDelete("[action]")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Delete(Product product)
         {
             var result = await _productService.Delete(product);
