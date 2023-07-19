@@ -35,7 +35,7 @@ namespace Business.Repositories.ProductRepository
             _orderDetailService = orderDetailService;
         }
 
-        //[SecuredAspect("Admin,Product.Add")]
+        [SecuredAspect("Admin,Product.Add")]
         [ValidationAspect(typeof(ProductValidator))]
         [RemoveCacheAspect("IProductService.Get")]
         public async Task<IResult> Add(Product product)
@@ -53,7 +53,7 @@ namespace Business.Repositories.ProductRepository
             return new SuccessResult(ProductMessages.Updated);
         }
 
-        //[SecuredAspect("Admin,Product.Delete")]
+        [SecuredAspect("Admin,Product.Delete")]
         [RemoveCacheAspect("IProductService.Get")]
         public async Task<IResult> Delete(Product product)
         {
@@ -64,8 +64,8 @@ namespace Business.Repositories.ProductRepository
             if (result is not null)
                 return result;
 
-            List<ProductImage> productImages = await _productImageService.GetListByProductId(product.Id);
-            foreach (ProductImage image in productImages)
+            var productImages = await _productImageService.GetListByProductId(product.Id);
+            foreach (ProductImage image in productImages.Data)
             {
                 await _productImageService.Delete(image);
             }
@@ -79,7 +79,7 @@ namespace Business.Repositories.ProductRepository
             return new SuccessResult(ProductMessages.Deleted);
         }
 
-        //[SecuredAspect("Admin,Product.Get")]
+        [SecuredAspect("Admin,Product.Get")]
         [CacheAspect()]
         [PerformanceAspect()]
         public async Task<IDataResult<List<ProductListDto>>> GetList()
@@ -93,8 +93,7 @@ namespace Business.Repositories.ProductRepository
             return new SuccessDataResult<Product>(await _productDal.Get(p => p.Id == id));
         }
 
-        //[SecuredAspect("Admin,Product.Get")]
-        [CacheAspect()]
+        [SecuredAspect("Admin,Product.Get")]
         [PerformanceAspect()]
         public async Task<IDataResult<List<ProductListDto>>> GetProductList(int customerId)
         {
