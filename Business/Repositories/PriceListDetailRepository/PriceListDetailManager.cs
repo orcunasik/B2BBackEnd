@@ -1,13 +1,15 @@
-using Business.Aspects.Secured;
+﻿using Business.Aspects.Secured;
 using Business.Repositories.PriceListDetailRepository.Constants;
 using Business.Repositories.PriceListDetailRepository.Validation;
 using Core.Aspects.Caching;
 using Core.Aspects.Performance;
 using Core.Aspects.Validation;
+using Core.Utilities.Business;
 using Core.Utilities.Result.Abstract;
 using Core.Utilities.Result.Concrete;
 using DataAccess.Repositories.PriceListDetailRepository;
 using Entities.Concrete;
+using Entities.Dtos;
 
 namespace Business.Repositories.PriceListDetailRepository
 {
@@ -20,11 +22,18 @@ namespace Business.Repositories.PriceListDetailRepository
             _priceListDetailDal = priceListDetailDal;
         }
 
-        //[SecuredAspect()]
+        [SecuredAspect()]
         [ValidationAspect(typeof(PriceListDetailValidator))]
         [RemoveCacheAspect("IPriceListDetailService.Get")]
         public async Task<IResult> Add(PriceListDetail priceListDetail)
         {
+            IResult result = BusinessRules
+                .Run(await CheckIfProductExist(priceListDetail));
+            if (result is not null)
+            {
+                return result;
+            }
+
             await _priceListDetailDal.Add(priceListDetail);
             return new SuccessResult(PriceListDetailMessages.Added);
         }
@@ -38,7 +47,7 @@ namespace Business.Repositories.PriceListDetailRepository
             return new SuccessResult(PriceListDetailMessages.Updated);
         }
 
-        //[SecuredAspect()]
+        [SecuredAspect()]
         [RemoveCacheAspect("IPriceListDetailService.Get")]
         public async Task<IResult> Delete(PriceListDetail priceListDetail)
         {
@@ -46,12 +55,20 @@ namespace Business.Repositories.PriceListDetailRepository
             return new SuccessResult(PriceListDetailMessages.Deleted);
         }
 
-        //[SecuredAspect()]
+        [SecuredAspect()]
         [CacheAspect()]
         [PerformanceAspect()]
         public async Task<IDataResult<List<PriceListDetail>>> GetList()
         {
             return new SuccessDataResult<List<PriceListDetail>>(await _priceListDetailDal.GetAll());
+        }
+
+        [SecuredAspect()]
+        [CacheAspect()]
+        [PerformanceAspect()]
+        public async Task<IDataResult<List<PriceListDetailDto>>> GetListDto(int priceListId)
+        {
+            return new SuccessDataResult<List<PriceListDetailDto>>(await _priceListDetailDal.GetListDto(priceListId));
         }
 
         [SecuredAspect()]
@@ -63,6 +80,14 @@ namespace Business.Repositories.PriceListDetailRepository
         public async Task<List<PriceListDetail>> GetListByProductId(int productId)
         {
             return await _priceListDetailDal.GetAll(p => p.ProductId == productId);
+        }
+
+        public async Task<IResult> CheckIfProductExist(PriceListDetail priceListDetail)
+        {
+            var result = await _priceListDetailDal.Get(p => p.PriceListId == priceListDetail.PriceListId && p.ProductId == priceListDetail.ProductId);
+            if(result is not null)
+                return new ErrorResult("Bu Ürün Daha Önce Fiyat Listesine Eklenmiş!");
+            return new SuccessResult();
         }
     }
 }

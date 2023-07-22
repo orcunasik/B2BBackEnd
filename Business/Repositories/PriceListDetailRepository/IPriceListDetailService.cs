@@ -1,5 +1,6 @@
 using Core.Utilities.Result.Abstract;
 using Entities.Concrete;
+using Entities.Dtos;
 
 namespace Business.Repositories.PriceListDetailRepository
 {
@@ -12,6 +13,7 @@ namespace Business.Repositories.PriceListDetailRepository
         Task<IResult> Delete(PriceListDetail priceListDetail);
 
         Task<IDataResult<List<PriceListDetail>>> GetList();
+        Task<IDataResult<List<PriceListDetailDto>>> GetListDto(int priceListId);
 
         Task<List<PriceListDetail>> GetListByProductId(int productId);
 

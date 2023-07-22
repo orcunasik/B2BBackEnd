@@ -1,4 +1,5 @@
 using Business.Repositories.PriceListDetailRepository;
+using Business.Repositories.PriceListRepository;
 using Entities.Concrete;
 using Microsoft.AspNetCore.Mvc;
 
@@ -52,6 +53,17 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetList()
         {
             var result = await _priceListDetailService.GetList();
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result.Message);
+        }
+
+        [HttpGet("[action]/{priceListId}")]
+        public async Task<IActionResult> GetListDto(int priceListId)
+        {
+            var result = await _priceListDetailService.GetListDto(priceListId);
             if (result.Success)
             {
                 return Ok(result);
