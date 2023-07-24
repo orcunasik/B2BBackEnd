@@ -26,7 +26,7 @@ namespace WebApi.Controllers
             return BadRequest(result.Message);
         }
 
-        [HttpPut("[action]")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Update(CustomerRelationship customerRelationship)
         {
             var result = await _customerRelationshipService.Update(customerRelationship);
