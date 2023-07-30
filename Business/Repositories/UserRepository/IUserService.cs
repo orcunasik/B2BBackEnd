@@ -8,6 +8,7 @@ namespace Business.Repositories.UserRepository
     {
         Task Add(RegisterAuthDto authDto);
         Task<IResult> Update(User user);
+        Task<IResult> UpdateUserByAdminPanel(UserDto userDto);
         Task<IResult> ConfirmUser(string confirmValue);
         Task<IResult> SendConfirmUserMail(string email);
         Task<IResult> SendForgotPasswordMail(string email);

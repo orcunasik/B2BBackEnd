@@ -92,13 +92,36 @@ namespace Business.Repositories.UserRepository
 
         [SecuredAspect()]
         [RemoveCacheAspect("IUserService.Get")]
+        public async Task<IResult> UpdateUserByAdminPanel(UserDto userDto)
+        {
+            User userEntity = await _userDal.Get(p => p.Id == userDto.Id);
+            bool result = HashingHelper.VerifyPasswordHash(userDto.Password, userEntity.PasswordHash, userEntity.PasswordSalt);
+            if (result)
+            {
+                if(userDto.NewPassword != "")
+                {
+                    byte[] passwordHash, passwordSalt;
+                    HashingHelper.CreatePassword(userDto.NewPassword, out passwordHash, out passwordSalt);
+                    userEntity.PasswordHash = passwordHash;
+                    userEntity.PasswordSalt = passwordSalt;
+                }
+                userEntity.Name = userDto.Name;
+                await _userDal.Update(userEntity);
+                return new SuccessResult(UserMessages.UpdatedUser);
+            }
+            else
+                return new ErrorResult("Şifreniz Mevcut Şifreniz Uyuşmuyor!");
+        }
+
+        [SecuredAspect()]
+        [RemoveCacheAspect("IUserService.Get")]
         public async Task<IResult> Delete(User user)
         {
             await _userDal.Delete(user);
             return new SuccessResult(UserMessages.DeletedUser);
         }
 
-        //[SecuredAspect()]
+        [SecuredAspect()]
         [CacheAspect(60)]
         [PerformanceAspect(3)]
         public async Task<IDataResult<List<User>>> GetList()
