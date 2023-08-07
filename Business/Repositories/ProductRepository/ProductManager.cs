@@ -93,7 +93,8 @@ namespace Business.Repositories.ProductRepository
             return new SuccessDataResult<Product>(await _productDal.Get(p => p.Id == id));
         }
 
-        [SecuredAspect("Admin,Product.Get")]
+        //[SecuredAspect("Admin,Product.Get")]
+        [RemoveCacheAspect("IProductService.Get")]
         [PerformanceAspect()]
         public async Task<IDataResult<List<ProductListDto>>> GetProductList(int customerId)
         {
